@@ -22216,6 +22216,7 @@ int wolfSSL_OBJ_txt2nid(const char* s) {
 
     return 0;
 }
+#endif
 
 
 WOLFSSL_BIO *wolfSSL_BIO_new_file(const char *filename, const char *mode)
