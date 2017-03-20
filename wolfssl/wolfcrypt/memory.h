@@ -91,7 +91,7 @@ WOLFSSL_API int wolfSSL_SetAllocators(wolfSSL_Malloc_cb  malloc_function,
         #ifndef SESSION_CERTS
             #define WOLFMEM_BUCKETS 64,128,256,512,1024,2432,3456,4544,16128
         #else
-            #define WOLFMEM_BUCKETS 64,128,256,512,1024,2432,3456,4544,21056
+            #define WOLFMEM_BUCKETS 64,128,256,512,1024,2432,3456,4544,21568
         #endif
     #endif
     #ifndef WOLFMEM_DIST

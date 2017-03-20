@@ -192,6 +192,8 @@ int wc_InitRsaKey_ex(RsaKey* key, void* heap, int devId)
 
     (void)devId;
 
+    XMEMSET(key, 0, sizeof(RsaKey));
+
     key->type = RSA_TYPE_UNKNOWN;
     key->state = RSA_STATE_NONE;
     key->heap = heap;
