@@ -103,12 +103,12 @@ typedef struct OS_Seed {
 #define DRBG_SEED_LEN (440/8)
 
 
-struct DRBG; /* Private DRBG state */
+typedef struct DRBG DRBG;
 
 
 /* Hash-based Deterministic Random Bit Generator */
 struct WC_RNG {
-    struct DRBG* drbg;
+    DRBG* drbg;
     OS_Seed seed;
     void* heap;
     byte status;
@@ -146,6 +146,7 @@ struct WC_RNG {
     #define RNG WC_RNG
 #endif
 
+
 WOLFSSL_LOCAL
 int wc_GenerateSeed(OS_Seed* os, byte* seed, word32 sz);
 
@@ -165,6 +166,8 @@ WOLFSSL_API int  wc_FreeRng(WC_RNG*);
 
 
 #if defined(HAVE_HASHDRBG) || defined(NO_RC4)
+    WOLFSSL_LOCAL int Hash_DRBG_Reseed(DRBG* drbg,
+                                        const byte* entropy, word32 entropySz);
     WOLFSSL_API int wc_RNG_HealthTest(int reseed,
                                         const byte* entropyA, word32 entropyASz,
                                         const byte* entropyB, word32 entropyBSz,
