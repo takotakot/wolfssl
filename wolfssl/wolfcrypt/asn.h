@@ -711,8 +711,6 @@ WOLFSSL_LOCAL int DecryptContent(byte* input, word32 sz,const char* psw,int pswS
 WOLFSSL_LOCAL int EncryptContent(byte* input, word32 sz, byte* out, word32* outSz,
         const char* password,int passwordSz, int vPKCS, int vAlgo,
         byte* salt, word32 saltSz, int itt, WC_RNG* rng, void* heap);
-WOLFSSL_LOCAL int wc_CreatePKCS8Key(byte* out, word32* outSz,
-        byte* key, word32 keySz, int algoID, const byte* curveOID, word32 oidSz);
 WOLFSSL_LOCAL int wc_GetKeyOID(byte* key, word32 keySz, const byte** curveOID,
         word32* oidSz, int* algoID, void* heap);
 
