@@ -9751,7 +9751,7 @@ int wc_SetSubject(Cert* cert, const char* subjectFile)
 
 #ifdef WOLFSSL_ALT_NAMES
 
-/* Set atl names from file in PEM */
+/* Set alt names from file in PEM */
 int wc_SetAltNames(Cert* cert, const char* file)
 {
     int         ret;
