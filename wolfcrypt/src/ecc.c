@@ -3603,7 +3603,7 @@ static int ecc_mul2add(ecc_point* A, mp_int* kA,
  return      MP_OKAY if successful (even if the signature is not valid)
  */
 int wc_ecc_verify_hash(const byte* sig, word32 siglen, const byte* hash,
-                       word32 hashlen, int* stat, ecc_key* key)
+                       word32 hashlen, int* state, ecc_key* key)
 {
     int err;
     mp_int *r = NULL, *s = NULL;
@@ -3613,7 +3613,7 @@ int wc_ecc_verify_hash(const byte* sig, word32 siglen, const byte* hash,
     s = &s_lcl;
 #endif
 
-    if (sig == NULL || hash == NULL || stat == NULL || key == NULL) {
+    if (sig == NULL || hash == NULL || state == NULL || key == NULL) {
         return ECC_BAD_ARG_E;
     }
 
@@ -3629,7 +3629,7 @@ int wc_ecc_verify_hash(const byte* sig, word32 siglen, const byte* hash,
             testDev->eccVerify.inSz = siglen;
             testDev->eccVerify.out = hash;
             testDev->eccVerify.outSz = hashlen;
-            testDev->eccVerify.stat = stat;
+            testDev->eccVerify.stat = state;
             testDev->eccVerify.key = key;
             return WC_PENDING_E;
         }
@@ -3643,7 +3643,7 @@ int wc_ecc_verify_hash(const byte* sig, word32 siglen, const byte* hash,
             key->state = ECC_STATE_VERIFY_DECODE;
 
             /* default to invalid signature */
-            *stat = 0;
+            *state = 0;
 
             /* Note, DecodeECC_DSA_Sig() calls mp_init() on r and s.
              * If either of those don't allocate correctly, none of
@@ -3680,7 +3680,7 @@ int wc_ecc_verify_hash(const byte* sig, word32 siglen, const byte* hash,
             s = key->s;
         #endif
 
-            err = wc_ecc_verify_hash_ex(r, s, hash, hashlen, stat,
+            err = wc_ecc_verify_hash_ex(r, s, hash, hashlen, state,
                                                                            key);
             if (err < 0) {
                 break;
@@ -3722,7 +3722,7 @@ int wc_ecc_verify_hash(const byte* sig, word32 siglen, const byte* hash,
    return      MP_OKAY if successful (even if the signature is not valid)
 */
 int wc_ecc_verify_hash_ex(mp_int *r, mp_int *s, const byte* hash,
-                    word32 hashlen, int* stat, ecc_key* key)
+                    word32 hashlen, int* state, ecc_key* key)
 {
    int           err;
 #ifndef WOLFSSL_ATECC508A
@@ -3737,11 +3737,11 @@ int wc_ecc_verify_hash_ex(mp_int *r, mp_int *s, const byte* hash,
    byte sigRS[ATECC_KEY_SIZE*2];
 #endif
 
-   if (r == NULL || s == NULL || hash == NULL || stat == NULL || key == NULL)
+   if (r == NULL || s == NULL || hash == NULL || state == NULL || key == NULL)
        return ECC_BAD_ARG_E;
 
    /* default to invalid signature */
-   *stat = 0;
+   *state = 0;
 
    /* is the IDX valid ?  */
    if (wc_ecc_is_valid_idx(key->idx) != 1) {
@@ -3883,7 +3883,7 @@ int wc_ecc_verify_hash_ex(mp_int *r, mp_int *s, const byte* hash,
    /* does v == r */
    if (err == MP_OKAY) {
        if (mp_cmp(&v, r) == MP_EQ)
-           *stat = 1;
+           *state = 1;
    }
 
    /* cleanup */
