@@ -532,7 +532,8 @@ typedef WOLFSSL_X509_STORE_CTX X509_STORE_CTX;
 /* Lighthttp compatibility */
 
 typedef WOLFSSL_X509_NAME_ENTRY X509_NAME_ENTRY;
-#if defined(HAVE_LIGHTY) || defined(WOLFSSL_MYSQL_COMPATIBLE) || defined(HAVE_STUNNEL)
+#if defined(HAVE_LIGHTY) || defined(WOLFSSL_MYSQL_COMPATIBLE) || \
+    defined(HAVE_STUNNEL) || defined(OPENSSL_EXTRA)
 
 #define SSL_CTX_use_certificate wolfSSL_CTX_use_certificate
 #define SSL_CTX_use_PrivateKey wolfSSL_CTX_use_PrivateKey
