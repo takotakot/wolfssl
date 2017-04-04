@@ -3767,7 +3767,9 @@ void SSL_ResourceFree(WOLFSSL* ssl)
     /* parameters (p,g) may be owned by ctx */
     if (ssl->buffers.weOwnDH || ssl->options.side == WOLFSSL_CLIENT_END) {
         XFREE(ssl->buffers.serverDH_G.buffer, ssl->heap, DYNAMIC_TYPE_DH);
+        ssl->buffers.serverDH_G.buffer = NULL;
         XFREE(ssl->buffers.serverDH_P.buffer, ssl->heap, DYNAMIC_TYPE_DH);
+        ssl->buffers.serverDH_P.buffer = NULL;
     }
 #endif /* !NO_DH */
 #ifndef NO_CERTS

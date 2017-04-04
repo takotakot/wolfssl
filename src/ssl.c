@@ -14853,10 +14853,29 @@ int wolfSSL_set_session_id_context(WOLFSSL* ssl, const unsigned char* id,
 
 void wolfSSL_set_connect_state(WOLFSSL* ssl)
 {
-    (void)ssl;
-    /* client by default */
+    WOLFSSL_ENTER("wolfSSL_set_connect_state");
+
+    if (ssl == NULL) {
+        WOLFSSL_MSG("WOLFSSL struct pointer passed in was null");
+        return;
+    }
+
+    ssl->options.side = WOLFSSL_CLIENT_END;
+
+    #ifndef NO_DH
+    /* client creates its own DH parameters on handshake */
+    if (ssl->buffers.serverDH_P.buffer && ssl->buffers.weOwnDH) {
+        XFREE(ssl->buffers.serverDH_P.buffer, ssl->heap, DYNAMIC_TYPE_DH);
+    }
+    ssl->buffers.serverDH_P.buffer = NULL;
+    if (ssl->buffers.serverDH_G.buffer && ssl->buffers.weOwnDH) {
+        XFREE(ssl->buffers.serverDH_G.buffer, ssl->heap, DYNAMIC_TYPE_DH);
+    }
+    ssl->buffers.serverDH_G.buffer = NULL;
+    #endif
 }
 #endif
+
 
 int wolfSSL_get_shutdown(const WOLFSSL* ssl)
 {
