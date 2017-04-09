@@ -4473,6 +4473,7 @@ static int DecodeAltNames(byte* input, int sz, DecodedCert* cert)
             idx    += strLen;
         }
         else if (b == (ASN_CONTEXT_SPECIFIC | ASN_URI_TYPE)) {
+            WOLFSSL_MSG("\tASN_URI_TYPE");
             int strLen;
             word32 lenStartIdx = idx;
 
