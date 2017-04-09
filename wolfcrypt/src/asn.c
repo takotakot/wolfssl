@@ -4400,6 +4400,7 @@ static int DecodeAltNames(byte* input, int sz, DecodedCert* cert)
         /* Save DNS Type names in the altNames list. */
         /* Save Other Type names in the cert's OidMap */
         if (b == (ASN_CONTEXT_SPECIFIC | ASN_DNS_TYPE)) {
+            WOLFSSL_MSG("\tASN_DNS_TYPE");
             DNS_entry* dnsEntry;
             int strLen;
             word32 lenStartIdx = idx;
@@ -4436,6 +4437,7 @@ static int DecodeAltNames(byte* input, int sz, DecodedCert* cert)
         }
 #ifndef IGNORE_NAME_CONSTRAINTS
         else if (b == (ASN_CONTEXT_SPECIFIC | ASN_RFC822_TYPE)) {
+            WOLFSSL_MSG("\tASN_RFC822_TYPE");
             DNS_entry* emailEntry;
             int strLen;
             word32 lenStartIdx = idx;
@@ -4474,6 +4476,7 @@ static int DecodeAltNames(byte* input, int sz, DecodedCert* cert)
 #ifdef WOLFSSL_SEP
         else if (b == (ASN_CONTEXT_SPECIFIC | ASN_CONSTRUCTED | ASN_OTHER_TYPE))
         {
+            WOLFSSL_MSG("\tASN_OTHER_TYPE");
             int strLen;
             word32 lenStartIdx = idx;
             word32 oid = 0;
