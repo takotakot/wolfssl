@@ -86,6 +86,7 @@ enum ASN_Tags {
     ASN_RFC822_TYPE       = 0x01,
     ASN_DNS_TYPE          = 0x02,
     ASN_DIR_TYPE          = 0x04,
+    ASN_URI_TYPE          = 0x06,
     ASN_GENERALIZED_TIME  = 0x18,
     CRL_EXTENSIONS        = 0xa0,
     ASN_EXTENSIONS        = 0xa3,
