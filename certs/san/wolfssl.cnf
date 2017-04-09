@@ -138,7 +138,8 @@ subjectAltName          = @alt_names
 [alt_names]
 DNS.1   = san1.wolfssl.com
 DNS.2   = san2.wolfssl.com
-
+email   = san@wolfssl.com
+URI     = http://san1.wolfssl.com/example-path/
 
 # Extensions for a typical CA
 [ v3_ca ]
