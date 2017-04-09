@@ -2516,6 +2516,7 @@ void InitDecodedCert(DecodedCert* cert, byte* source, word32 inSz, void* heap)
     cert->altNames        = NULL;
 #ifndef IGNORE_NAME_CONSTRAINTS
     cert->altEmailNames   = NULL;
+    cert->altUriNames     = NULL;
     cert->permittedNames  = NULL;
     cert->excludedNames   = NULL;
 #endif /* IGNORE_NAME_CONSTRAINTS */
@@ -2664,6 +2665,8 @@ void FreeDecodedCert(DecodedCert* cert)
 #ifndef IGNORE_NAME_CONSTRAINTS
     if (cert->altEmailNames)
         FreeAltNames(cert->altEmailNames, cert->heap);
+    if (cert->altUriNames)
+        FreeAltNames(cert->altUriNames, cert->heap);
     if (cert->permittedNames)
         FreeNameSubtrees(cert->permittedNames, cert->heap);
     if (cert->excludedNames)
@@ -4212,6 +4215,7 @@ static int ConfirmSignature(const byte* buf, word32 bufSz,
 
 #ifndef IGNORE_NAME_CONSTRAINTS
 
+/* TODO for ASN_URI_TYPE  */
 static int MatchBaseName(int type, const char* name, int nameSz,
                          const char* base, int baseSz)
 {
@@ -4306,6 +4310,17 @@ static int ConfirmNameConstraints(Signer* signer, DecodedCert* cert)
                     name = name->next;
                 }
             }
+            else if (base->type == ASN_URI_TYPE) {
+                DNS_entry* name = cert->altUriNames;
+                while (name != NULL) {
+                    if (MatchBaseName(ASN_URI_TYPE,
+                                          name->name, (int)XSTRLEN(name->name),
+                                          base->name, base->nameSz))
+                        return 0;
+
+                    name = name->next;
+                }
+            }
             else if (base->type == ASN_DIR_TYPE) {
                 if (cert->subjectRawLen == base->nameSz &&
                     XMEMCMP(cert->subjectRaw, base->name, base->nameSz) == 0) {
@@ -4323,6 +4338,8 @@ static int ConfirmNameConstraints(Signer* signer, DecodedCert* cert)
         int matchDns = 0;
         int needEmail = 0;
         int matchEmail = 0;
+        int needUri = 0;
+        int matchUri = 0;
         int needDir = 0;
         int matchDir = 0;
         Base_entry* base = signer->permittedNames;
@@ -4354,6 +4371,19 @@ static int ConfirmNameConstraints(Signer* signer, DecodedCert* cert)
                     name = name->next;
                 }
             }
+            else if (base->type == ASN_URI_TYPE) {
+                DNS_entry* name = cert->altUriNames;
+
+                if (name != NULL)
+                    needUri = 1;
+
+                while (name != NULL) {
+                    matchUri = MatchBaseName(ASN_DNS_TYPE,  // DNS?
+                                          name->name, (int)XSTRLEN(name->name),
+                                          base->name, base->nameSz);
+                    name = name->next;
+                }
+            }
             else if (base->type == ASN_DIR_TYPE) {
                 needDir = 1;
                 if (cert->subjectRaw != NULL &&
@@ -4367,7 +4397,7 @@ static int ConfirmNameConstraints(Signer* signer, DecodedCert* cert)
         }
 
         if ((needDns && !matchDns) || (needEmail && !matchEmail) ||
-            (needDir && !matchDir)) {
+            (needUri && !matchUri) || (needDir && !matchDir)) {
 
             return 0;
         }
@@ -4474,17 +4504,39 @@ static int DecodeAltNames(byte* input, int sz, DecodedCert* cert)
         }
         else if (b == (ASN_CONTEXT_SPECIFIC | ASN_URI_TYPE)) {
             WOLFSSL_MSG("\tASN_URI_TYPE");
+            DNS_entry* uriEntry;
             int strLen;
             word32 lenStartIdx = idx;
 
-            WOLFSSL_MSG("\tUnsupported name type, skipping");
-
             if (GetLength(input, &idx, &strLen, sz) < 0) {
-                WOLFSSL_MSG("\tfail: unsupported name length");
+                WOLFSSL_MSG("\tfail: str length");
                 return ASN_PARSE_E;
             }
-            length -= (strLen + idx - lenStartIdx);
-            idx += strLen;
+            length -= (idx - lenStartIdx);
+
+            uriEntry = (DNS_entry*)XMALLOC(sizeof(DNS_entry), cert->heap,
+                                        DYNAMIC_TYPE_ALTNAME);
+            if (uriEntry == NULL) {
+                WOLFSSL_MSG("\tOut of Memory");
+                return MEMORY_E;
+            }
+
+            uriEntry->name = (char*)XMALLOC(strLen + 1, cert->heap,
+                                         DYNAMIC_TYPE_ALTNAME);
+            if (uriEntry->name == NULL) {
+                WOLFSSL_MSG("\tOut of Memory");
+                XFREE(uriEntry, cert->heap, DYNAMIC_TYPE_ALTNAME);
+                return MEMORY_E;
+            }
+
+            XMEMCPY(uriEntry->name, &input[idx], strLen);
+            uriEntry->name[strLen] = '\0';
+
+            uriEntry->next = cert->altUriNames;
+            cert->altUriNames = uriEntry;
+
+            length -= strLen;
+            idx    += strLen;
         }
 #endif /* IGNORE_NAME_CONSTRAINTS */
 #ifdef WOLFSSL_SEP
