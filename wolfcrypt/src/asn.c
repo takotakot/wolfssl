@@ -4472,6 +4472,19 @@ static int DecodeAltNames(byte* input, int sz, DecodedCert* cert)
             length -= strLen;
             idx    += strLen;
         }
+        else if (b == (ASN_CONTEXT_SPECIFIC | ASN_URI_TYPE)) {
+            int strLen;
+            word32 lenStartIdx = idx;
+
+            WOLFSSL_MSG("\tUnsupported name type, skipping");
+
+            if (GetLength(input, &idx, &strLen, sz) < 0) {
+                WOLFSSL_MSG("\tfail: unsupported name length");
+                return ASN_PARSE_E;
+            }
+            length -= (strLen + idx - lenStartIdx);
+            idx += strLen;
+        }
 #endif /* IGNORE_NAME_CONSTRAINTS */
 #ifdef WOLFSSL_SEP
         else if (b == (ASN_CONTEXT_SPECIFIC | ASN_CONSTRUCTED | ASN_OTHER_TYPE))
