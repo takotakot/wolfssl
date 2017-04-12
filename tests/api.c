@@ -3935,7 +3935,7 @@ static void test_wolfSSL_sk_GENERAL_NAME(void)
     printf(testingFmt, "wolfSSL_sk_GENERAL_NAME()");
 
     AssertNotNull(f = XFOPEN(cliCertDer, "rb"));
-    AssertIntGT((bytes = XFREAD(buf, 1, sizeof(buf), f)), 0);
+    AssertIntGT((bytes = (int)XFREAD(buf, 1, sizeof(buf), f)), 0);
     XFCLOSE(f);
 
     bufPt = buf;
