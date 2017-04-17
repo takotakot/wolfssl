@@ -5396,6 +5396,25 @@ int cert_test(void)
         goto done;
     }
 
+    /* Certificate with Subject Alternative Names extension. */
+#ifdef FREESCALE_MQX
+    file = fopen(".\\certs\\test\\cert-ext-san.der", "rb");
+#else
+    file = fopen("./certs/test/cert-ext-san.der", "rb");
+#endif
+    if (!file) {
+        ret = -201;
+        goto done;
+    }
+    bytes = fread(tmp, 1, FOURK_BUF, file);
+    fclose(file);
+    InitDecodedCert(&cert, tmp, (word32)bytes, 0);
+    ret = ParseCert(&cert, CERT_TYPE, NO_VERIFY, NULL);
+    if (ret != 0) {
+        ret = -205;
+        goto done;
+    }
+
 done:
     FreeDecodedCert(&cert);
     XFREE(tmp, HEAP_HINT, DYNAMIC_TYPE_TMP_BUFFER);
