@@ -80,3 +80,35 @@ nsComment        = "Testing inhibit any"
 EOF
 gen_cert
 
+OUT=certs/test/cert-ext-san.der
+KEYFILE=certs/test/cert-ext-san-key.der
+CONFIG=certs/test/cert-ext-san.cfg
+PEM=certs/test/cert-ext-san.pem
+tee >$CONFIG <<EOF
+[ req ]
+distinguished_name = req_distinguished_name
+prompt             = no
+x509_extensions    = v3_ca
+
+[ req_distinguished_name ]
+C             = AU
+ST            = Queensland
+L             = Brisbane
+O             = wolfSSL Inc
+OU            = Engineering
+CN            = www.wolfssl.com
+emailAddress  = support@www.wolfsssl.com
+
+[ v3_ca ]
+subjectAltName     = @alt_names
+
+[alt_names]
+DNS.1         = san1.wolfssl.com
+DNS.2         = san2.wolfssl.com
+email         = san@wolfssl.com
+URI           = http://san1.wolfssl.com/example-path/
+
+EOF
+gen_cert
+gen_pem
+
