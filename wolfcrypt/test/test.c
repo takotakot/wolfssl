@@ -5395,6 +5395,7 @@ int cert_test(void)
         ret = -204;
         goto done;
     }
+    FreeDecodedCert(&cert);
 
     /* Certificate with Subject Alternative Names extension. */
 #ifdef FREESCALE_MQX
