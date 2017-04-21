@@ -5415,6 +5415,60 @@ int cert_test(void)
         ret = -205;
         goto done;
     }
+    /* Check Parsed Cert */
+    /* namesList[namesIdx][caseIdx] is a case. */
+    DNS_entry *decodedNamesList[] = {
+            cert.altNames
+#ifndef IGNORE_NAME_CONSTRAINTS
+            , cert.altEmailNames, cert.altUriNames
+#endif /* IGNORE_NAME_CONSTRAINTS */
+    };
+    const char *altNames[] = {"san2.wolfssl.com", "san1.wolfssl.com"},
+            // Two strings of "support@www.wolfsssl.com" come from emailAddress of Subject and Issuer
+            *altEmailNames[] = {"san@wolfssl.com", "support@www.wolfsssl.com", "support@www.wolfsssl.com"},
+            *altUriNames[] = {"http://san1.wolfssl.com/example-path/"};
+    const char **namesList[] = {
+            altNames
+#ifndef IGNORE_NAME_CONSTRAINTS
+            , altEmailNames, altUriNames
+#endif /* IGNORE_NAME_CONSTRAINTS */
+    };
+    int namesSz = sizeof(decodedNamesList)/sizeof(decodedNamesList[0]), namesIdx = 0, caseIdx = 0;
+    int caseSz[] = {
+            sizeof(altNames)/sizeof(altNames[0])
+#ifndef IGNORE_NAME_CONSTRAINTS
+            , sizeof(altEmailNames)/sizeof(altEmailNames[0]), sizeof(altUriNames)/sizeof(altUriNames[0])
+#endif /* IGNORE_NAME_CONSTRAINTS */
+    };
+    DNS_entry *entry;
+    
+    // printf("namesSz: %d\n", namesSz);
+    // while(namesIdx < namesSz) {
+    for(namesIdx = 0; namesIdx < namesSz; ++namesIdx) {
+        entry = decodedNamesList[namesIdx];
+        for(caseIdx = 0; caseIdx < caseSz[namesIdx]; ++caseIdx) {
+            // Decoded names are fewer than expected.
+            if(entry == NULL) {
+                ret = -206;
+                goto done;
+            }
+            if (XSTRNCMP(namesList[namesIdx][caseIdx], entry->name, XSTRLEN(entry->name)) != 0) {
+                ret = -208;
+                goto done;
+            }
+            printf("entry, name: %d, %s\n", (int)entry, entry->name);
+            printf("expect: %s\n", namesList[namesIdx][caseIdx]);
+            entry = entry->next;
+            printf("next: %d\n", (int)entry);
+        }
+        // end with namesIdx == caseSz[namesIdx]
+        // Decoded names are more than expected.
+        if(entry != NULL) {
+            ret = -207;
+            goto done;
+        }
+    }
+    
 
 done:
     FreeDecodedCert(&cert);
