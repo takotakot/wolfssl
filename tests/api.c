@@ -2944,7 +2944,9 @@ static void test_wolfSSL_ERR_peek_last_error_line(void)
     callback_functions client_cb;
     callback_functions server_cb;
     int         line = 0;
+    int         flag = ERR_TXT_STRING;
     const char* file = NULL;
+    const char* data = NULL;
 
     printf(testingFmt, "wolfSSL_ERR_peek_last_error_line()");
 
@@ -2972,6 +2974,9 @@ static void test_wolfSSL_ERR_peek_last_error_line(void)
     join_thread(serverThread);
 
     FreeTcpReady(&ready);
+
+    AssertIntGT(ERR_get_error_line_data(NULL, NULL, &data, &flag), 0);
+    AssertNotNull(data);
 
     /* check clearing error state */
     ERR_remove_state(0);
