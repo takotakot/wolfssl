@@ -32,6 +32,7 @@ gen_pem() {
 
 OUT=certs/test/cert-ext-nc.der
 CONFIG=certs/test/cert-ext-nc.cfg
+PEM=${OUT%.der}.pem
 tee >$CONFIG <<EOF
 [ req ]
 distinguished_name = req_distinguished_name
@@ -53,9 +54,11 @@ nsComment       = "Testing name constraints"
 
 EOF
 gen_cert
+gen_pem
 
 OUT=certs/test/cert-ext-ia.der
 CONFIG=certs/test/cert-ext-ia.cfg
+PEM=${OUT%.der}.pem
 tee >$CONFIG <<EOF
 [ req ]
 distinguished_name = req_distinguished_name
@@ -77,4 +80,5 @@ nsComment        = "Testing inhibit any"
 
 EOF
 gen_cert
+gen_pem
 
