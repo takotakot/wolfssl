@@ -18,7 +18,6 @@ gen_cert() {
 }
 
 OUT=certs/test/cert-ext-nc.der
-KEYFILE=certs/test/cert-ext-nc-key.der
 CONFIG=certs/test/cert-ext-nc.cfg
 tee >$CONFIG <<EOF
 [ req ]
@@ -43,7 +42,6 @@ EOF
 gen_cert
 
 OUT=certs/test/cert-ext-ia.der
-KEYFILE=certs/test/cert-ext-ia-key.der
 CONFIG=certs/test/cert-ext-ia.cfg
 tee >$CONFIG <<EOF
 [ req ]
