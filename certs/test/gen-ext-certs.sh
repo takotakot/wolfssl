@@ -17,6 +17,19 @@ gen_cert() {
     rm $TMP
 }
 
+gen_pem() {
+    if [ -f $OUT ]; then
+        openssl x509 -inform DER -in $OUT -text >$PEM
+        if [ "$?" = "0" -a -f $PEM ]; then
+            echo "Created: $PEM"
+        else
+            echo "Failed:  $PEM"
+        fi
+    else
+        echo "Not exist:  $OUT"
+    fi
+}
+
 OUT=certs/test/cert-ext-nc.der
 CONFIG=certs/test/cert-ext-nc.cfg
 tee >$CONFIG <<EOF
