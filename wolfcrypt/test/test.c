@@ -5718,6 +5718,92 @@ int cert_test(void)
         ret = -204;
         goto done;
     }
+    FreeDecodedCert(&cert);
+
+    /* Certificate with Subject Alternative Names extension. */
+#ifdef FREESCALE_MQX
+    file = fopen(".\\certs\\test\\cert-ext-san.der", "rb");
+#else
+    file = fopen("./certs/test/cert-ext-san.der", "rb");
+#endif
+    if (!file) {
+        ret = -201;
+        goto done;
+    }
+    bytes = fread(tmp, 1, FOURK_BUF, file);
+    fclose(file);
+    InitDecodedCert(&cert, tmp, (word32)bytes, 0);
+    ret = ParseCert(&cert, CERT_TYPE, NO_VERIFY, NULL);
+    if (ret != 0) {
+        ret = -205;
+        goto done;
+    }
+
+    /* Check parsed cert with Subject Alternative Names extension. */
+    int testIdx = 0, testSz = 1, caseIdx = 0, caseSz = 0;
+    DNS_entry *entry;
+    const char **names;
+    const int *types;
+
+    /* Entities are in the reverse order. */
+    const char *altNames[] = {"http://san1.wolfssl.com/example-path/", "san2.wolfssl.com", "san1.wolfssl.com"};
+    const int altNamesTypes[] = {ASN_URI_TYPE, ASN_DNS_TYPE, ASN_DNS_TYPE};
+
+#ifndef IGNORE_NAME_CONSTRAINTS
+    ++testSz;
+    /* Two strings of "support@www.wolfsssl.com" come from emailAddress of Subject and Issuer. */
+    const char *altEmailNames[] = {"san@wolfssl.com", "support@www.wolfsssl.com", "support@www.wolfsssl.com"};
+    const int altEmailNamesTypes[] = {ASN_RFC822_TYPE, 0, 0};
+#endif
+
+    for(testIdx = 0; testIdx < testSz; ++testIdx) {
+        switch(testIdx){
+#ifndef IGNORE_NAME_CONSTRAINTS
+            case 1:
+                caseSz = sizeof(altEmailNamesTypes)/sizeof(altEmailNamesTypes[0]);
+                entry = cert.altEmailNames;
+                names = altEmailNames;
+                types = altEmailNamesTypes;
+                break;
+#endif
+            case 0:
+                caseSz = sizeof(altNamesTypes)/sizeof(altNamesTypes[0]);
+                entry = cert.altNames;
+                names = altNames;
+                types = altNamesTypes;
+                break;
+            default:
+                continue;
+                break;
+        }
+
+        for(caseIdx = 0; caseIdx < caseSz; ++caseIdx) {
+            /* Decoded names are fewer than expected. */
+            if(entry == NULL) {
+                ret = -206;
+                goto done;
+            }
+#if 0
+            printf("name, type: %s, %d\n", entry->name, entry->type);
+            printf("expected name, type: %s, %d\n", names[caseIdx], types[caseIdx]);
+#endif
+            if (XSTRNCMP(names[caseIdx], entry->name, XSTRLEN(entry->name)) != 0) {
+                ret = -208;
+                goto done;
+            }
+            if(types[caseIdx] != entry->type) {
+                ret = -209;
+                goto done;
+            }
+            entry = entry->next;
+        }
+        /* Decoded names are more than expected. */
+        if(entry != NULL) {
+            ret = -207;
+            goto done;
+        }
+    }
+    /* End of check parsed cert with Subject Alternative Names extension. */
 
 done:
     FreeDecodedCert(&cert);
